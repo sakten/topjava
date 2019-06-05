@@ -30,25 +30,18 @@ public class UserMealsUtil {
     public static List<UserMealWithExceed>  getFilteredWithExceeded(List<UserMeal> mealList, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
         HashMap<LocalDate,Integer> dayCalories = new HashMap<LocalDate, Integer>();
         ArrayList<UserMeal> mealsInPeriod = new ArrayList<>();
-        List<UserMealWithExceed> result = new ArrayList<>();
-        for(UserMeal meal:mealList){
+        for (UserMeal meal:mealList){
             LocalDate date = meal.getDateTime().toLocalDate();
+            dayCalories.put(date, dayCalories.getOrDefault(date,0) + meal.getCalories());
+
             LocalTime time = meal.getDateTime().toLocalTime();
-
-            if (dayCalories.containsKey(date)){
-                  int currVal=dayCalories.get(date);
-                  dayCalories.put(date,currVal+meal.getCalories());
-            }
-            else{
-                dayCalories.put(date,meal.getCalories());
-            }
-
-            if (time.isAfter(startTime) && time.isBefore(endTime)){
+            if (TimeUtil.isBetween(time,startTime,endTime)){
                 mealsInPeriod.add(meal);
             }
         }
 
-        for(UserMeal meal : mealsInPeriod){
+        List<UserMealWithExceed> result = new ArrayList<>();
+        for (UserMeal meal : mealsInPeriod){
             if(dayCalories.get(meal.getDateTime().toLocalDate()) > caloriesPerDay){
                 result.add(new UserMealWithExceed(meal,true));
             }
